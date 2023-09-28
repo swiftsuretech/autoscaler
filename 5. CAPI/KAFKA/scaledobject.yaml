@@ -1,0 +1,14 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: consumer-scaled
+spec:
+  scaleTargetRef:
+    name: strimzi-cluster-operator
+  triggers:
+  - type: kafka
+    metadata:
+      topic: autoscaler-test
+      bootstrapServers: my-cluster-kafka-bootstrap.default.svc.cluster.local:9092
+      consumerGroup: my-kafka-consumer-group
+      lagThreshold: '5'

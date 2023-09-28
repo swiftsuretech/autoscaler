@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kowl-dashboard
+  labels:
+    app.kubernetes.io/instance: kowl-dashboard
+    app.kubernetes.io/name: kowl-dashboard
+  annotations:
+    kubernetes.io/ingress.class: kommander-traefik
+    traefik.ingress.kubernetes.io/router.middlewares: >-
+      kommander-stripprefixes@kubernetescrd,kommander-forwardauth-full@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /kafka
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: kowl
+                port:
+                  number: 80

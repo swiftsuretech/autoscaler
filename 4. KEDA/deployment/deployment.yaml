@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: davecloud
+  namespace: kommander
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: davecloud
+  template:
+    metadata:
+      labels:
+        app: davecloud
+    spec:
+      containers:
+      - name: davecloud
+        image: dswhitehouse/davecloud:0.1
+        ports:
+        - containerPort: 80 
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: davecloud-service
+  namespace: kommander
+spec:
+  selector:
+    app: davecloud
+  ports:
+    - protocol: TCP
+      port: 80
+      name: metrics
+      targetPort: 80
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: davecloud-service
+  namespace: kommander
+  labels:
+    app.kubernetes.io/instance: davecloud
+    app.kubernetes.io/name: davecloud
+  annotations:
+    kubernetes.io/ingress.class: kommander-traefik
+    traefik.ingress.kubernetes.io/router.middlewares: >-
+      kommander-stripprefixes-davecloud@kubernetescrd,kommander-forwardauth-full@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /davecloud
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: davecloud-service
+                port:
+                  number: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: stripprefixes-davecloud
+  namespace: kommander
+spec:
+  stripPrefix:
+    prefixes:
+      - /davecloud

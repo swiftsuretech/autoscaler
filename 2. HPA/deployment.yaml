@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hpa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: davecloud
+  namespace: hpa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: davecloud
+  template:
+    metadata:
+      labels:
+        app: davecloud
+    spec:
+      containers:
+      - name: davecloud
+        image: dswhitehouse/stress:0.1
+        resources:
+          requests:
+            memory: "32Mi" 
+            cpu: "100m"
+          limits:
+            memory: "64Mi"
+            cpu: "1"

@@ -1,0 +1,1 @@
+kubectl apply -f https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/deploy/vpa-crd.yaml

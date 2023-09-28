@@ -1,0 +1,22 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: davecloud
+  namespace: kommander
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: davecloud            
+  pollingInterval:  10
+  cooldownPeriod:   30
+  minReplicaCount:  1
+  maxReplicaCount:  10
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://kube-prometheus-stack-prometheus.kommander.svc.cluster.local:9090
+      query: max(irate(traefik_service_requests_total{service="kommander-davecloud-service-80@kubernetes",code=~"304|200"}[5m]))
+      activationThreshold: '0.1'
+      threshold: '0.5'
+
